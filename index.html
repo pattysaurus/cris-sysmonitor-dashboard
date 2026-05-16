@@ -423,14 +423,14 @@
             <span class="logo-text">SysMonitor</span>
         </div>
         <div class="connect-title">Connect to a machine</div>
-        <div class="connect-subtitle">Enter the IP address of the PC running the SysMonitor JAR.</div>
+        <div class="connect-subtitle">Enter the server IP or Cloudflare tunnel URL of the PC running the SysMonitor JAR.</div>
 
-        <label class="input-label">Server IP Address</label>
+        <label class="input-label">Server Address</label>
         <div class="ip-input-row">
-            <input class="ip-input" id="ip-input" type="text" placeholder="192.168.0.4" spellcheck="false" />
+            <input class="ip-input" id="ip-input" type="text" placeholder="192.168.0.4 or abc.trycloudflare.com" spellcheck="false" />
             <button class="connect-btn" onclick="connect()">Connect</button>
         </div>
-        <div class="connect-hint">Port 8443 is used by default.</div>
+        <div class="connect-hint">Local IP uses port 8443. Cloudflare URLs need no port.</div>
         <div class="connect-error" id="connect-error">Could not reach the server. Check the IP and make sure the JAR is running.</div>
     </div>
 </div>
@@ -567,9 +567,10 @@
         const raw = document.getElementById('ip-input').value.trim();
         if (!raw) return;
 
-        // Strip protocol/port if user pasted full URL
-        const ip = raw.replace(/^https?:\/\//, '').replace(/:.*$/, '');
-        BASE_URL = 'https://' + ip + ':8443';
+        // Detect if local IP or external URL (Cloudflare etc)
+        const host = raw.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        const isLocalIP = /^[\d.]+$/.test(host.split(':')[0]);
+        BASE_URL = isLocalIP ? 'https://' + host.replace(/:.*$/, '') + ':8443' : 'https://' + host;
 
         document.getElementById('connect-error').style.display = 'none';
 
